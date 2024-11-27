@@ -1,0 +1,17 @@
+mainmenu "Project Configuration"
+
+	menu "Application Configuration"
+		config APP_MAJOR_VERSION
+			int "Major version number"
+			default 1
+
+		config APP_MINOR_VERSION
+			int "Minor version number"
+			default 0
+
+		config APP_BUILD_VERSION
+			int "Build version number"
+			default 0
+	endmenu
+
+source "Kconfig.zephyr"
