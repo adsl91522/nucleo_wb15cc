@@ -25,8 +25,9 @@ python -m pip install -r ./bootloader/mcuboot/scripts/requirements.txt
 ### 2. STM32_BLE_HCILayer
 BLE HCILayer firmware.bin OTA update through STM32CubeProgrammer 
 (Note: Zephyr only supports the following firmware)
-(1) stm32wb1x_BLE_HCILayer_extended_fw.bin (0x0802D000)
-(2) stm32wb1x_BLE_HCILayer_fw.bin (0x08032000)
+1. stm32wb1x_BLE_HCILayer_extended_fw.bin (0x0802D000)
+2. stm32wb1x_BLE_HCILayer_fw.bin (0x08032000)
+
 For details, please refer to [Release Note](https://github.com/adsl91522/nucleo_wb15cc/blob/master/STM32WB15XX_Copro_Wireless_Binaries/STM32WB1x/Release_Notes.html)
 - STM32CubeProgrammer -> connected nucleo_wb15cc
 - Enter Firmware Upgrade Services -> choose stm32wb1x_BLE_HCILayer_fw.bin
