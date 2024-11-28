@@ -1,0 +1,479 @@
+diff --git a/boards/arm/nucleo_wb15cc/Kconfig.board b/boards/arm/nucleo_wb15cc/Kconfig.board
+new file mode 100644
+index 0000000000..25e8622f12
+--- /dev/null
++++ b/boards/arm/nucleo_wb15cc/Kconfig.board
+@@ -0,0 +1,8 @@
++# STM32WB15CC Nucleo board configuration
++
++# Copyright (c) 2020 STMicroelectronics
++# SPDX-License-Identifier: Apache-2.0
++
++config BOARD_NUCLEO_WB15CC
++	bool "Nucleo WB15CC Development Board"
++	depends on SOC_STM32WB15XX
+diff --git a/boards/arm/nucleo_wb15cc/Kconfig.defconfig b/boards/arm/nucleo_wb15cc/Kconfig.defconfig
+new file mode 100644
+index 0000000000..e75ed5c06d
+--- /dev/null
++++ b/boards/arm/nucleo_wb15cc/Kconfig.defconfig
+@@ -0,0 +1,20 @@
++# STM32LWB15CC Nucleo board configuration
++
++# Copyright (c) 2019 Linaro Limited
++# SPDX-License-Identifier: Apache-2.0
++
++if BOARD_NUCLEO_WB15CC
++
++config BOARD
++	default "nucleo_wb15cc"
++
++choice BT_HCI_BUS_TYPE
++	default BT_STM32_IPM
++	depends on BT
++endchoice
++
++# LPTIM clocked by LSE, force tick freq to 4096 for tick accuracy
++config SYS_CLOCK_TICKS_PER_SEC
++	default 4096 if STM32_LPTIM_TIMER
++
++endif # BOARD_NUCLEO_WB15CC
+diff --git a/boards/arm/nucleo_wb15cc/arduino_r3_connector.dtsi b/boards/arm/nucleo_wb15cc/arduino_r3_connector.dtsi
+new file mode 100644
+index 0000000000..da9a4d2bbc
+--- /dev/null
++++ b/boards/arm/nucleo_wb15cc/arduino_r3_connector.dtsi
+@@ -0,0 +1,40 @@
++/*
++ * Copyright (c) 2020 STMicroelectronics
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ */
++
++/ {
++	arduino_header: connector {
++		compatible = "arduino-header-r3";
++		#gpio-cells = <2>;
++		gpio-map-mask = <0xffffffff 0xffffffc0>;
++		gpio-map-pass-thru = <0 0x3f>;
++		gpio-map = <0 0 &gpioa 4 0>,	/* A0 */
++			   <1 0 &gpioa 6 0>,	/* A1 */
++			   <2 0 &gpioa 1 0>,	/* A2 */
++			   <3 0 &gpioa 0 0>,	/* A3 */
++			   <4 0 &gpioa 2 0>,	/* A4 */
++			   <5 0 &gpioa 3 0>,	/* A5 */
++			   <6 0 &gpiob 7 0>,	/* D0 */
++			   <7 0 &gpiob 6 0>,	/* D1 */
++			   <8 0 &gpiob 0 0>,	/* D2 */
++			   <9 0 &gpioa 12 0>,	/* D3 */
++			   <10 0 &gpiob 1 0>,	/* D4 */
++			   <11 0 &gpioa 11 0>,	/* D5 */
++			   <12 0 &gpioa 8 0>,	/* D6 */
++			   <13 0 &gpioe 4 0>,	/* D7 */
++			   <14 0 &gpiob 5 0>,	/* D8 */
++			   <15 0 &gpioa 15 0>,	/* D9 */
++			   <16 0 &gpiob 2 0>,	/* D10 */
++			   <17 0 &gpioa 7 0>,	/* D11 */
++			   <18 0 &gpiob 4 0>,	/* D12 */
++			   <19 0 &gpioa 5 0>,	/* D13 */
++			   <20 0 &gpiob 9 0>,	/* D14 */
++			   <21 0 &gpiob 8 0>;	/* D15 */
++	};
++};
++
++arduino_i2c: &i2c1 {};
++arduino_spi: &spi1 {};
++arduino_serial: &lpuart1 {};
+diff --git a/boards/arm/nucleo_wb15cc/board.cmake b/boards/arm/nucleo_wb15cc/board.cmake
+new file mode 100644
+index 0000000000..35cfeb968c
+--- /dev/null
++++ b/boards/arm/nucleo_wb15cc/board.cmake
+@@ -0,0 +1,7 @@
++# SPDX-License-Identifier: Apache-2.0
++board_runner_args(pyocd "--target=stm32w15ccux")
++board_runner_args(stm32cubeprogrammer "--port=swd" "--reset-mode=hw")
++
++include(${ZEPHYR_BASE}/boards/common/openocd.board.cmake)
++include(${ZEPHYR_BASE}/boards/common/pyocd.board.cmake)
++include(${ZEPHYR_BASE}/boards/common/stm32cubeprogrammer.board.cmake)
+diff --git a/boards/arm/nucleo_wb15cc/nucleo_wb15cc.dts b/boards/arm/nucleo_wb15cc/nucleo_wb15cc.dts
+new file mode 100644
+index 0000000000..8700d733ee
+--- /dev/null
++++ b/boards/arm/nucleo_wb15cc/nucleo_wb15cc.dts
+@@ -0,0 +1,214 @@
++/*
++ * Copyright (c) 2020 STMicroelectronics
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ */
++
++/dts-v1/;
++#include <st/wb/stm32wb15cc.dtsi>
++#include <st/wb/stm32wb15ccux-pinctrl.dtsi>
++#include "arduino_r3_connector.dtsi"
++#include <zephyr/dt-bindings/input/input-event-codes.h>
++
++/ {
++	model = "STMicroelectronics STM32WB15CC-NUCLEO board";
++	compatible = "st,stm32wb15cc-nucleo";
++
++	chosen {
++		zephyr,console = &usart1;
++		zephyr,shell-uart = &usart1;
++		zephyr,bt-mon-uart = &lpuart1;
++		zephyr,bt-c2h-uart = &lpuart1;
++		zephyr,sram = &sram0;
++		zephyr,flash = &flash0;
++		zephyr,code-partition = &slot0_partition;
++	};
++
++	leds: leds {
++		compatible = "gpio-leds";
++		blue_led_1: led_0 {
++			gpios = <&gpiob 5 GPIO_ACTIVE_HIGH>;
++			label = "User LED1";
++		};
++		green_led_2: led_1 {
++			gpios = <&gpiob 0 GPIO_ACTIVE_HIGH>;
++			label = "User LED2";
++		};
++		green_led_3: led_2 {
++			gpios = <&gpiob 1 GPIO_ACTIVE_HIGH>;
++			label = "User LED3";
++		};
++	};
++
++	gpio_keys {
++		compatible = "gpio-keys";
++		user_button_1: button_0 {
++			label = "SW1";
++			gpios = <&gpioa 0 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
++			zephyr,code = <INPUT_KEY_0>;
++		};
++		user_button_2: button_1 {
++			label = "SW2";
++			gpios = <&gpioe 4 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
++			zephyr,code = <INPUT_KEY_1>;
++		};
++		user_button_3: button_2 {
++			label = "SW3";
++			gpios = <&gpioa 6 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
++			zephyr,code = <INPUT_KEY_2>;
++		};
++	};
++
++	aliases {
++		led0 = &green_led_2;
++		sw0 = &user_button_1;
++		sw1 = &user_button_2;
++		sw2 = &user_button_3;
++		watchdog0 = &iwdg;
++		die-temp0 = &die_temp;
++		volt-sensor0 = &vref;
++		volt-sensor1 = &vbat;
++	};
++};
++
++&die_temp {
++	status = "okay";
++};
++
++&clk_lsi1 {
++	status = "okay";
++};
++
++&clk_hse {
++	status = "okay";
++};
++
++&clk_lse {
++	status = "okay";
++};
++
++&clk_hsi48 {
++	status = "disabled";
++};
++
++&clk48 {
++	clocks = <&rcc STM32_SRC_MSI CLK48_SEL(1)>;
++};
++
++&rcc {
++	clocks = <&clk_hse>;
++	clock-frequency = <DT_FREQ_M(32)>;
++	cpu1-prescaler = <1>;
++	cpu2-prescaler = <1>;
++	ahb4-prescaler = <1>;
++	apb1-prescaler = <1>;
++	apb2-prescaler = <1>;
++};
++
++&rtc {
++	clocks = <&rcc STM32_CLOCK_BUS_APB1 0x00000400>,
++		 <&rcc STM32_SRC_LSE RTC_SEL(2)>;
++	status = "okay";
++	
++	backup_regs {
++		status = "okay";
++	};
++};
++
++&lptim1 {
++	clocks = <&rcc STM32_CLOCK_BUS_APB1 0x80000000>,
++		 <&rcc STM32_SRC_LSE LPTIM1_SEL(1)>;
++	status = "disabled";
++};
++
++&lpuart1 {
++	pinctrl-0 = <&lpuart1_tx_pa2 &lpuart1_rx_pa3>;
++	pinctrl-names = "default";
++	current-speed = <115200>;
++	status = "okay";
++};
++
++&adc1 {
++	pinctrl-0 = <&adc1_in2_pa7>;
++	pinctrl-names = "default";
++	st,adc-clock-source = <SYNC>;
++	st,adc-prescaler = <4>;
++	status = "disabled";
++};
++
++&timers1 {
++	st,prescaler = <10000>;
++	status = "disabled";
++
++	pwm1: pwm {
++		status = "disabled";
++		pinctrl-0 = <&tim1_ch1_pa8>;
++		pinctrl-names = "default";
++	};
++};
++
++&usart1 {
++	pinctrl-0 = <&usart1_tx_pa9 &usart1_rx_pa10>;
++	pinctrl-names = "default";
++	current-speed = <115200>;
++	status = "okay";
++};
++
++&i2c1 {
++	pinctrl-0 = <&i2c1_scl_pb8 &i2c1_sda_pb9>;
++	pinctrl-names = "default";
++	status = "disabled";
++	clock-frequency = <I2C_BITRATE_FAST>;
++};
++
++&spi1 {
++	pinctrl-0 = <&spi1_nss_pa4 &spi1_sck_pa1
++		     &spi1_miso_pa11 &spi1_mosi_pa5>;
++	pinctrl-names = "default";
++	status = "disabled";
++};
++
++&rng {
++	status = "okay";
++};
++
++&flash0 {
++	partitions {
++		compatible = "fixed-partitions";
++		#address-cells = <1>;
++		#size-cells = <1>;
++
++		/*
++		 * Configure partitions while leaving space for M0 BLE f/w
++		 * Since STM32WBCube release V1.13.2, only _HCIOnly_ f/w are supported.
++		 * These FW are expected to be located not before 0x080DB000
++		 * Current partition is using the first 876K of the flash for M4
++		 */
++
++		boot_partition: partition@0 {
++			label = "mcuboot";
++			reg = <0x00000000 DT_SIZE_K(10)>;
++		};
++		slot0_partition: partition@c000 {
++			label = "image-0";
++			reg = <0x00002800 DT_SIZE_K(50)>;
++		};
++		slot1_partition: partition@70000 {
++			label = "image-1";
++			reg = <0x0000F000 DT_SIZE_K(50)>;
++		};
++		storage_partition: partition@d8000 {
++			label = "storage";
++			reg = <0x0001b800 DT_SIZE_K(8)>;
++		};
++
++	};
++};
++
++&vref {
++	status = "okay";
++};
++
++&vbat {
++	status = "okay";
++};
+diff --git a/boards/arm/nucleo_wb15cc/nucleo_wb15cc.yaml b/boards/arm/nucleo_wb15cc/nucleo_wb15cc.yaml
+new file mode 100644
+index 0000000000..ab2ea78a9e
+--- /dev/null
++++ b/boards/arm/nucleo_wb15cc/nucleo_wb15cc.yaml
+@@ -0,0 +1,24 @@
++identifier: nucleo_wb15cc
++name: ST Nucleo WB15CC
++type: mcu
++arch: arm
++toolchain:
++  - zephyr
++  - gnuarmemb
++  - xtools
++ram: 48
++flash: 320
++supported:
++  - gpio
++  - i2c
++  - counter
++  - dma
++  - spi
++  - pwm
++  - adc
++  - watchdog
++  - arduino_gpio
++  - arduino_i2c
++  - arduino_spi
++  - nvs
++vendor: st
+diff --git a/boards/arm/nucleo_wb15cc/nucleo_wb15cc_defconfig b/boards/arm/nucleo_wb15cc/nucleo_wb15cc_defconfig
+new file mode 100644
+index 0000000000..daf29b8fbc
+--- /dev/null
++++ b/boards/arm/nucleo_wb15cc/nucleo_wb15cc_defconfig
+@@ -0,0 +1,24 @@
++CONFIG_SOC_SERIES_STM32WBX=y
++CONFIG_SOC_STM32WB15XX=y
++
++# enable uart driver
++CONFIG_SERIAL=y
++
++# enable GPIO
++CONFIG_GPIO=y
++
++# Enable Clocks
++CONFIG_CLOCK_CONTROL=y
++
++# console
++CONFIG_CONSOLE=y
++CONFIG_UART_CONSOLE=y
++
++# Enable MPU
++CONFIG_ARM_MPU=y
++
++# Enable HW stack protection
++CONFIG_HW_STACK_PROTECTION=y
++
++# enable pin controller
++CONFIG_PINCTRL=y
+diff --git a/boards/arm/nucleo_wb15cc/support/openocd.cfg b/boards/arm/nucleo_wb15cc/support/openocd.cfg
+new file mode 100644
+index 0000000000..f962293b34
+--- /dev/null
++++ b/boards/arm/nucleo_wb15cc/support/openocd.cfg
+@@ -0,0 +1,10 @@
++source [find interface/stlink.cfg]
++
++transport select hla_swd
++
++source [find target/stm32wbx.cfg]
++
++reset_config srst_only srst_nogate
++
++# Sleep mode compatible reset configuration (stock firmware compatible)
++# reset_config srst_only srst_nogate connect_assert_srst
+diff --git a/dts/arm/st/wb/stm32wb15.dtsi b/dts/arm/st/wb/stm32wb15.dtsi
+new file mode 100644
+index 0000000000..4e42802152
+--- /dev/null
++++ b/dts/arm/st/wb/stm32wb15.dtsi
+@@ -0,0 +1,13 @@
++/*
++ * Copyright (c) 2018 Linaro Limited
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ */
++
++#include <st/wb/stm32wb.dtsi>
++
++/ {
++	soc {
++		compatible = "st,stm32wb15", "st,stm32wb", "simple-bus";
++	};
++};
+diff --git a/dts/arm/st/wb/stm32wb15cc.dtsi b/dts/arm/st/wb/stm32wb15cc.dtsi
+new file mode 100644
+index 0000000000..e5ce846fff
+--- /dev/null
++++ b/dts/arm/st/wb/stm32wb15cc.dtsi
+@@ -0,0 +1,39 @@
++/*
++ * Copyright (c) 2018 Linaro Limited
++ *
++ * SPDX-License-Identifier: Apache-2.0
++ */
++#include <mem.h>
++#include <st/wb/stm32wb15.dtsi>
++
++/ {
++	sram0: memory@20000000 {
++		reg = < 0x20000000 DT_SIZE_K(10)>;
++	};
++
++	sram1: memory@20030000 {
++		compatible = "zephyr,memory-region", "mmio-sram";
++		reg = <0x20030000 DT_SIZE_K(4)>;
++		zephyr,memory-region = "SRAM1";
++	};
++
++	sram2: memory@20038000 {
++		compatible = "zephyr,memory-region", "mmio-sram";
++		reg = <0x20038000 DT_SIZE_K(4)>;
++		zephyr,memory-region = "SRAM2";
++	};
++
++	sram3: memory@20031000 {
++		compatible = "zephyr,memory-region", "mmio-sram";
++		reg = <0x20031000 DT_SIZE_K(14)>;
++		zephyr,memory-region = "SRAM3";
++	};
++
++	soc {
++		flash-controller@58004000 {
++			flash0: flash@8000000 {
++				reg = <0x08000000 DT_SIZE_K(200)>;
++			};
++		};
++	};
++};
+diff --git a/soc/arm/st_stm32/stm32wb/Kconfig.defconfig.stm32wb15xx b/soc/arm/st_stm32/stm32wb/Kconfig.defconfig.stm32wb15xx
+new file mode 100644
+index 0000000000..cc9896814a
+--- /dev/null
++++ b/soc/arm/st_stm32/stm32wb/Kconfig.defconfig.stm32wb15xx
+@@ -0,0 +1,14 @@
++# ST Microelectronics STM32WB55XX MCU
++
++# Copyright (c) 2019 Linaro Limited
++# SPDX-License-Identifier: Apache-2.0
++
++if SOC_STM32WB15XX
++
++config SOC
++	default "stm32wb15xx"
++
++config NUM_IRQS
++	default 63
++
++endif # SOC_STM32WB15XX

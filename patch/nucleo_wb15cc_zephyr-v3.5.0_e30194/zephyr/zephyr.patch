@@ -1,0 +1,31 @@
+diff --git a/drivers/bluetooth/hci/ipm_stm32wb.c b/drivers/bluetooth/hci/ipm_stm32wb.c
+index 9ee261ae3d..852e50592f 100644
+--- a/drivers/bluetooth/hci/ipm_stm32wb.c
++++ b/drivers/bluetooth/hci/ipm_stm32wb.c
+@@ -504,10 +504,10 @@ static int c2_reset(void)
+ #if !STM32_HSI48_ENABLED
+ 	/* Deprecated: enable HSI48 using device tree */
+ #warning Bluetooth IPM requires HSI48 clock to be enabled using device tree
+-	/* Keeping this sequence for legacy: */
+-	LL_RCC_HSI48_Enable();
+-	while (!LL_RCC_HSI48_IsReady()) {
+-	}
++	// /* Keeping this sequence for legacy: */
++	// LL_RCC_HSI48_Enable();
++	// while (!LL_RCC_HSI48_IsReady()) {
++	// }
+ 
+ #endif /* !STM32_HSI48_ENABLED */
+ 
+diff --git a/soc/arm/st_stm32/stm32wb/Kconfig.soc b/soc/arm/st_stm32/stm32wb/Kconfig.soc
+index df65225d31..fd44bd0fd6 100644
+--- a/soc/arm/st_stm32/stm32wb/Kconfig.soc
++++ b/soc/arm/st_stm32/stm32wb/Kconfig.soc
+@@ -10,4 +10,7 @@ choice
+ config SOC_STM32WB55XX
+ 	bool "STM32WB55XX"
+ 
++config SOC_STM32WB15XX
++	bool "STM32WB15XX"
++
+ endchoice

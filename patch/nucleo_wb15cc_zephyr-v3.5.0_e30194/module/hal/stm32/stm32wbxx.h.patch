@@ -1,0 +1,16 @@
+diff --git a/stm32cube/stm32wbxx/soc/stm32wbxx.h b/stm32cube/stm32wbxx/soc/stm32wbxx.h
+index 8f4bfc16..125b1c23 100644
+--- a/stm32cube/stm32wbxx/soc/stm32wbxx.h
++++ b/stm32cube/stm32wbxx/soc/stm32wbxx.h
+@@ -95,9 +95,9 @@ extern "C" {
+ #elif defined(STM32WB30xx)
+ #include "stm32wb30xx.h"
+ #elif defined(STM32WB15xx)
+-#include "stm32wb15xx.h"
++#include "include/stm32wb15xx.h"
+ #elif defined(STM32WB10xx)
+-#include "stm32wb10xx.h"
++#include "include/stm32wb10xx.h"
+ #elif defined(STM32WB1Mxx)
+ #include "stm32wb1mxx.h"
+ #else
