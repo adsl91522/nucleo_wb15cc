@@ -5,8 +5,8 @@ This example explains how to bring up nucleo_wb15cc in Zephyr v3.5.0
 ### 1. Install Zephyr SDK environment
 - Install [toolchain](https://docs.zephyrproject.org/latest/develop/toolchains/zephyr_sdk.html)
 ```
-unzip zephyr-sdk-0.16.0_windows-x86_64.7z
-cd zephyr-sdk-0.16.0
+unzip zephyr-sdk-0.17.0_windows-x86_64.7z
+cd zephyr-sdk-0.17.0
 setup.cmd
 ```
 - Install west
